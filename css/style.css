@@ -1,0 +1,150 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+}
+
+body {
+    background-color: #f4f4f9;
+    color: #333;
+}
+
+header {
+    background-color: #a06666;
+    color: white;
+    text-align: center;
+    padding: 2rem;
+    margin-bottom: 2rem;
+}
+
+.container {
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: wrap;
+    gap: 20px;
+    padding: 0 20px;
+}
+
+.card {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    width: 100%;
+    max-width: 400px;
+}
+
+.card h2 {
+    margin-bottom: 15px;
+    color: #946162;
+}
+
+.input-group {
+    margin-bottom: 15px;
+}
+
+.input-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+.input-group input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+button {
+    width: 100%;
+    padding: 10px;
+    background-color: #946162;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+button:hover {
+    background-color: #e0484d;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+}
+
+th, td {
+    padding: 12px;
+    border-bottom: 1px solid #ddd;
+    text-align: left;
+}
+
+tbody tr {
+    cursor: pointer; /* Deixa o mouse com a mãozinha */
+    transition: background 0.3s;
+}
+
+tbody tr:hover {
+    background-color: #f1f1f1; /* Destaca a linha que o mouse tá em cima */
+}
+
+.tooltip {
+    position: absolute;
+    background-color: rgba(0, 0, 0, 0.85);
+    color: #fff;
+    padding: 12px;
+    border-radius: 6px;
+    pointer-events: none; /* Importante: impede que o mouse "bata" no próprio tooltip e bugue */
+    opacity: 0; /* Começa invisível */
+    transition: opacity 0.2s;
+    z-index: 1000;
+    font-size: 14px;
+    line-height: 1.5;
+    box-shadow: 0px 4px 8px rgba(0,0,0,0.3);
+}
+
+/* Classe que a gente vai adicionar via TS pra mostrar o tooltip */
+.tooltip.visivel {
+    opacity: 1;
+}
+
+.menu-navegacao {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.menu-navegacao a {
+    text-decoration: none;
+    color: rgb(255, 255, 255);
+    background-color: #a16565;
+    padding: 10px 20px;
+    border-radius: 4px;
+    font-weight: bold;
+    transition: background 0.3s;
+}
+
+.menu-navegacao a:hover {
+    background-color: #6e4e4f;
+}
+
+form input, form textarea {
+    width: 100%; 
+    margin-bottom: 12px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+form textarea {
+    resize: vertical; 
+    min-height: 80px;
+}
