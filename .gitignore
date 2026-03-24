@@ -1,0 +1,26 @@
+# --- Compilação (TypeScript) ---
+# Ignora a pasta onde os arquivos .js são gerados automaticamente
+dist/
+out/
+
+# --- Dependências (Caso você use npm no futuro) ---
+node_modules/
+package-lock.json
+
+# --- Sistema Operacional ---
+# Arquivos temporários do Windows
+Thumbs.db
+desktop.ini
+
+# Arquivos temporários do macOS
+.DS_Store
+
+# --- Editores de Código ---
+# Configurações específicas do VS Code
+.vscode/
+*.code-workspace
+
+# --- Logs e Cache ---
+npm-debug.log*
+.eslintcache
+.parcel-cache
