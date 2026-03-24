@@ -9,21 +9,13 @@ MVP do LinkeTinder para conectar talentos e empresas, com foco em fundamentos de
 
 ## 🎬 Demonstração
 
-> Dica: mantenha esta seção no topo para facilitar a avaliação rápida por recrutadores.
-
-Adicione aqui as mídias principais do projeto:
-
 - Tela de cadastro
+  ![Tela de Cadastro](./docs/assets/cadastro.png)
 - Visão da empresa com gráfico de competências (Chart.js)
+  ![Visão da Empresa com Gráfico](./docs/assets/perfil-empresa-chart.png)
+
 - Tooltip flutuante com anonimato dos dados sensíveis
-
-Exemplo de estrutura (substitua pelos seus arquivos reais):
-
-```md
-![Tela de Cadastro](./docs/assets/cadastro.gif)
-![Visão da Empresa com Gráfico](./docs/assets/perfil-empresa-chart.png)
 ![Tooltip de Anonimato](./docs/assets/tooltip-anonimato.png)
-```
 
 ## 🧠 Contexto do Projeto
 
@@ -89,7 +81,7 @@ npm install -g typescript
 1. Clone o repositório:
 
 ```bash
-git clone <URL_DO_SEU_REPOSITORIO>
+git clone (https://github.com/fernandosantos01/ZG-Hero-Project-K1-T7-Typescript-Linketinder.git)
 ```
 
 2. Acesse a pasta do projeto:
