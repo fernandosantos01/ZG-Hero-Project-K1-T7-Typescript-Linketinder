@@ -18,8 +18,8 @@ export interface Empresa {
     pais: string;
     estado: string;
     cep: string;
-    descricao: string; // Funciona como a descrição da vaga/empresa
-    habilidades: string[]; // O que a empresa tá buscando
+    descricao: string;
+    habilidades: string[];
 }
 
 export function getCandidatos(): Candidato[] {
