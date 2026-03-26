@@ -57,6 +57,7 @@ O objetivo deste MVP é simular uma plataforma de match entre candidatos e empre
 ├── src/
 │   ├── cadastro.ts
 │   ├── database.ts
+│   ├── mascaras.ts
 │   ├── perfil-candidato.ts
 │   └── perfil-empresa.ts
 └── dist/
@@ -125,6 +126,34 @@ Use sempre um servidor local HTTP (ex.: Live Server).
 - Tooltip com anonimização de dados sensíveis (nome e CPF ocultos)
 - Gráfico de competências com Chart.js
 - Persistência local via LocalStorage
+- Validações de formulário com Regex para campos críticos
+- Máscaras automáticas para CPF, CNPJ, telefone e CEP
+- Campos adicionais no candidato: telefone e LinkedIn
+
+## 🔒 Regras de validação e formatação
+
+O fluxo de cadastro agora aplica validações mais rigorosas antes de persistir os dados, incluindo:
+
+- Nome com tamanho mínimo e caracteres válidos
+- E-mail em formato válido
+- CPF e CNPJ em formato mascarado
+- Telefone em padrão nacional
+- CEP no formato 00000-000
+- LinkedIn com URL válida de perfil
+- Habilidades separadas por vírgula
+
+Além disso, as máscaras são aplicadas em tempo real nos inputs para melhorar a experiência de preenchimento.
+
+## 📝 Última evolução
+
+Commit: `01ae58a`  
+Título: `feat: adiciona validacoes regex, mascaras e novos campos`  
+Arquivos impactados:
+
+- `cadastro.html`
+- `src/cadastro.ts`
+- `src/database.ts`
+- `src/mascaras.ts`
 
 ## 🛣️ Próximos Passos
 
