@@ -3,6 +3,8 @@ export interface Candidato {
     nome: string;
     email: string;
     cpf: string;
+    telefone: string;
+    linkedin: string;
     idade: number;
     estado: string;
     cep: string;
