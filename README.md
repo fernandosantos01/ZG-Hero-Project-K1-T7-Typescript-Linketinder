@@ -91,10 +91,10 @@ git clone (https://github.com/fernandosantos01/ZG-Hero-Project-K1-T7-Typescript-
 cd LinkeTinderTypeScript
 ```
 
-3. Compile os arquivos TypeScript para JavaScript:
+3. Compile e execute os arquivos TypeScript para JavaScript:
 
 ```bash
-tsc
+tsc -w
 ```
 
 4. Inicie um servidor local na raiz do projeto:
