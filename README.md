@@ -5,7 +5,7 @@
 ![Frontend](https://img.shields.io/badge/frontend-Vanilla_TS%2FHTML%2FCSS-0A7EA4)
 ![Backend](https://img.shields.io/badge/backend-Mockado_(LocalStorage)-6B7280)
 
-MVP do LinkeTinder para conectar talentos e empresas, com foco em fundamentos de TypeScript, arquitetura simples e evolução futura para backend real.
+MVP do LinkeTinder para conectar talentos e empresas, com foco em fundamentos de TypeScript, arquitetura em camadas e evolução futura para backend real.
 
 ## 🎬 Demonstração
 
@@ -13,16 +13,15 @@ MVP do LinkeTinder para conectar talentos e empresas, com foco em fundamentos de
   ![Tela de Cadastro](./docs/assets/cadastro.png)
 - Visão da empresa com gráfico de competências (Chart.js)
   ![Visão da Empresa com Gráfico](./docs/assets/perfil-empresa-chart.png)
-
 - Tooltip flutuante com anonimato dos dados sensíveis
-![Tooltip de Anonimato](./docs/assets/tooltip-anonimato.png)
+  ![Tooltip de Anonimato](./docs/assets/tooltip-anonimato.png)
 
 ## 🧠 Contexto do Projeto
 
 O objetivo deste MVP é simular uma plataforma de match entre candidatos e empresas:
 
 - Candidato e empresa se cadastram com dados e habilidades
-- Empresa visualiza candidatos com dados sensíveis anonimizados
+- Vagas são publicadas pela empresa e listadas para os candidatos com dados sensíveis anonimizados
 - Competências dos candidatos são apresentadas em gráfico para tomada de decisão rápida
 
 ## 💻 Tecnologias
@@ -40,8 +39,8 @@ O objetivo deste MVP é simular uma plataforma de match entre candidatos e empre
 
 - Backend simulado (mockado) usando LocalStorage do navegador
   - Operações de Create e Delete persistem dados localmente no browser
-- Camada de serviço isolada em `src/database.ts`
-  - Centraliza acesso aos dados e reduz acoplamento da interface
+- Arquitetura em camadas: models, repositories, services e validators
+  - Cada camada tem responsabilidade única e bem definida
   - Facilita migração futura para API REST + banco de dados real sem reescrever a camada de telas
 
 ## 🧱 Estrutura do Projeto
@@ -55,11 +54,29 @@ O objetivo deste MVP é simular uma plataforma de match entre candidatos e empre
 ├── css/
 │   └── style.css
 ├── src/
-│   ├── cadastro.ts
-│   ├── database.ts
-│   ├── mascaras.ts
+│   ├── formularioCadastro.ts
 │   ├── perfil-candidato.ts
-│   └── perfil-empresa.ts
+│   ├── perfil-empresa.ts
+│   ├── models/
+│   │   ├── Candidato.ts
+│   │   ├── Empresa.ts
+│   │   └── Vaga.ts
+│   ├── repositories/
+│   │   ├── CandidatoRepository.ts
+│   │   ├── EmpresaRepository.ts
+│   │   ├── VagaRepository.ts
+│   │   ├── ICandidatoRepository.ts
+│   │   ├── IEmpresaRepository.ts
+│   │   └── IVagaRepository.ts
+│   ├── services/
+│   │   ├── CandidatoService.ts
+│   │   ├── EmpresaService.ts
+│   │   └── VagaService.ts
+│   └── validators/
+│       ├── CandidatoValidator.ts
+│       ├── EmpresaValidators.ts
+│       ├── VagaValidator.ts
+│       └── mascaras.ts
 └── dist/
 ```
 
@@ -82,7 +99,7 @@ npm install -g typescript
 1. Clone o repositório:
 
 ```bash
-git clone (https://github.com/fernandosantos01/ZG-Hero-Project-K1-T7-Typescript-Linketinder.git)
+git clone https://github.com/fernandosantos01/ZG-Hero-Project-K1-T7-Typescript-Linketinder.git
 ```
 
 2. Acesse a pasta do projeto:
@@ -91,7 +108,7 @@ git clone (https://github.com/fernandosantos01/ZG-Hero-Project-K1-T7-Typescript-
 cd LinkeTinderTypeScript
 ```
 
-3. Compile e execute os arquivos TypeScript para JavaScript:
+3. Compile os arquivos TypeScript para JavaScript:
 
 ```bash
 tsc -w
@@ -120,19 +137,22 @@ Use sempre um servidor local HTTP (ex.: Live Server).
 
 ## ✅ Funcionalidades MVP
 
-- Cadastro de candidatos
-- Cadastro de empresas/vagas
-- Listagem de candidatos para empresas
+- Cadastro de candidatos com validação e máscaras automáticas (CPF, CNPJ, telefone, CEP)
+- Cadastro de empresas
+- Publicação de vagas com **busca de empresa por nome** (autocomplete)
+- Listagem de vagas para candidatos com título, competências e localização
 - Tooltip com anonimização de dados sensíveis (nome e CPF ocultos)
-- Gráfico de competências com Chart.js
+- Gráfico de competências dos candidatos com Chart.js
 - Persistência local via LocalStorage
-- Validações de formulário com Regex para campos críticos
-- Máscaras automáticas para CPF, CNPJ, telefone e CEP
-- Campos adicionais no candidato: telefone e LinkedIn
+- Arquitetura em camadas (models / repositories / services / validators)
+
+## 🔍 Autocomplete de Empresa na Publicação de Vaga
+
+Ao publicar uma vaga, o usuário digita o nome da empresa no campo de busca. O sistema filtra em tempo real as empresas cadastradas e exibe uma lista de sugestões. Ao selecionar uma empresa, o ID é preenchido automaticamente em um campo oculto — sem necessidade de copiar ou informar IDs manualmente.
 
 ## 🔒 Regras de validação e formatação
 
-O fluxo de cadastro agora aplica validações mais rigorosas antes de persistir os dados, incluindo:
+O fluxo de cadastro aplica validações antes de persistir os dados:
 
 - Nome com tamanho mínimo e caracteres válidos
 - E-mail em formato válido
@@ -140,20 +160,9 @@ O fluxo de cadastro agora aplica validações mais rigorosas antes de persistir 
 - Telefone em padrão nacional
 - CEP no formato 00000-000
 - LinkedIn com URL válida de perfil
-- Habilidades separadas por vírgula
+- Habilidades e competências separadas por vírgula
 
-Além disso, as máscaras são aplicadas em tempo real nos inputs para melhorar a experiência de preenchimento.
-
-## 📝 Última evolução
-
-Commit: `01ae58a`  
-Título: `feat: adiciona validacoes regex, mascaras e novos campos`  
-Arquivos impactados:
-
-- `cadastro.html`
-- `src/cadastro.ts`
-- `src/database.ts`
-- `src/mascaras.ts`
+As máscaras são aplicadas em tempo real nos inputs para melhorar a experiência de preenchimento.
 
 ## 🛣️ Próximos Passos
 
@@ -161,7 +170,7 @@ Arquivos impactados:
 - Adicionar banco de dados relacional ou NoSQL
 - Criar autenticação/autorização
 - Implementar testes automatizados (unitários e integração)
-- Evoluir UX com feedback visual de sucesso/erro e validações mais robustas
+- Evoluir UX com feedback visual de sucesso/erro
 
 ## 👨‍💻 Autor
 
