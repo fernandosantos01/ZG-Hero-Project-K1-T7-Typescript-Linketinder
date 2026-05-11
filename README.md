@@ -43,6 +43,108 @@ O objetivo deste MVP é simular uma plataforma de match entre candidatos e empre
   - Cada camada tem responsabilidade única e bem definida
   - Facilita migração futura para API REST + banco de dados real sem reescrever a camada de telas
 
+## 🧩 Design Patterns Aplicados
+
+### 1. Singleton — Repositories
+
+**Onde:** `CandidatoRepository`, `EmpresaRepository`, `VagaRepository`
+
+Cada repository expõe um construtor `private` e um método estático `getInstance()`. A primeira chamada cria a instância; as seguintes retornam sempre a mesma.
+
+```ts
+// CandidatoRepository.ts
+private static instance: CandidatoRepository
+
+private constructor() {}
+
+static getInstance(): CandidatoRepository {
+    if (!CandidatoRepository.instance) {
+        CandidatoRepository.instance = new CandidatoRepository()
+    }
+    return CandidatoRepository.instance
+}
+```
+
+**Por quê melhora o código:**
+Os repositories são a ponte direta com o `localStorage`. Ter múltiplas instâncias não quebra nada, mas cria objetos desnecessários e abre margem para estados divergentes se a camada de persistência evoluir. Com Singleton, há uma única fonte de verdade por entidade, e qualquer código que acesse o repository — seja o service, seja a tela de perfil — opera sobre o mesmo objeto.
+
+---
+
+### 2. Factory — Criação de objetos de domínio
+
+**Onde:** `src/factories/CandidatoFactory.ts`, `EmpresaFactory.ts`, `VagaFactory.ts`
+
+Cada factory expõe um método estático `criar()` que recebe os dados sem `id` (`Omit<T, 'id'>`) e entrega o objeto completo com o identificador gerado internamente.
+
+```ts
+// CandidatoFactory.ts
+static criar(dados: Omit<Candidato, 'id'>): Candidato {
+    return {
+        id: Math.random().toString(36).substring(2, 9),
+        ...dados
+    }
+}
+```
+
+**Por quê melhora o código:**
+Antes, a geração do `id` e a montagem do objeto estavam espalhadas diretamente nas funções do formulário. Com as factories, essa responsabilidade fica centralizada: se a estratégia de geração de ID mudar (ex.: UUID, sequencial, vindo do backend), altera-se apenas a factory, sem tocar nas telas.
+
+---
+
+### 3. Factory — Criação e composição dos Services (ServiceFactory)
+
+**Onde:** `src/factories/ServiceFactory.ts`
+
+A `ServiceFactory` é responsável por montar cada service com suas dependências (repository + validator) e manter uma única instância de cada um — combinando Factory com comportamento de Singleton para a camada de serviços.
+
+```ts
+// ServiceFactory.ts
+static criarCandidatoService(): CandidatoService {
+    if (!ServiceFactory.candidatoService) {
+        ServiceFactory.candidatoService = new CandidatoService(
+            CandidatoRepository.getInstance(),
+            new CandidatoValidator()
+        )
+    }
+    return ServiceFactory.candidatoService
+}
+```
+
+**Por quê melhora o código:**
+Antes, `formularioCadastro.ts` instanciava manualmente cada service com seus `new Repository()` e `new Validator()`. Isso acoplava a tela ao detalhe de construção de cada dependência. A `ServiceFactory` isola essa lógica de composição em um único lugar: trocar uma implementação de repository (ex.: de `localStorage` para API REST) requer mudança apenas na factory, não nas telas.
+
+---
+
+### 4. Dependency Injection — Injeção via construtor nos Services
+
+**Onde:** `CandidatoService`, `EmpresaService`, `VagaService`
+
+Cada service declara suas dependências no construtor e trabalha contra interfaces (`ICandidatoRepository`, `IEmpresaRepository`, `IVagaRepository`), não contra implementações concretas.
+
+```ts
+// CandidatoService.ts
+constructor(
+    private repository: ICandidatoRepository,
+    private validator:  CandidatoValidator
+) {}
+```
+
+**Por quê melhora o código:**
+O service não sabe — nem precisa saber — se os dados vêm do `localStorage`, de uma API ou de um mock de testes. Qualquer classe que implemente `ICandidatoRepository` pode ser injetada. Isso permite trocar a camada de dados sem modificar a lógica de negócio e facilita a escrita de testes unitários com implementações alternativas (fakes/mocks).
+
+---
+
+### 5. Repository Pattern — Abstração da camada de dados
+
+**Onde:** interfaces `ICandidatoRepository`, `IEmpresaRepository`, `IVagaRepository` + suas implementações
+
+Cada repository encapsula toda operação sobre uma entidade específica (`listar`, `salvar`, `deletar`). Os services consomem apenas a interface, nunca o `localStorage` diretamente.
+
+**Por quê melhora o código:**
+Separa o "o quê" (regra de negócio no service) do "como" (persistência no repository). Quando o projeto evoluir para uma API REST, bastará criar uma nova implementação das interfaces — toda a camada de serviços permanece intacta.
+
+---
+
 ## 🧱 Estrutura do Projeto
 
 ```text
@@ -57,6 +159,11 @@ O objetivo deste MVP é simular uma plataforma de match entre candidatos e empre
 │   ├── formularioCadastro.ts
 │   ├── perfil-candidato.ts
 │   ├── perfil-empresa.ts
+│   ├── factories/
+│   │   ├── CandidatoFactory.ts
+│   │   ├── EmpresaFactory.ts
+│   │   ├── VagaFactory.ts
+│   │   └── ServiceFactory.ts
 │   ├── models/
 │   │   ├── Candidato.ts
 │   │   ├── Empresa.ts

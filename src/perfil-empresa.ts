@@ -3,7 +3,7 @@ import type { Candidato } from './models/Candidato.js'
 
 declare const Chart: any
 
-const candidatoRepo = new CandidatoRepository()
+const candidatoRepo = CandidatoRepository.getInstance()
 const candidatos: Candidato[] = candidatoRepo.listar()
 
 const tabelaBody = document.querySelector('#tabela-candidatos tbody') as HTMLTableSectionElement

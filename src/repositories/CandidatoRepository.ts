@@ -4,6 +4,17 @@ import type { ICandidatoRepository } from './ICandidatoRepository.js'
 const CHAVE = 'linketinder_candidatos';
 
 export class CandidatoRepository implements ICandidatoRepository {
+    private static instance: CandidatoRepository
+
+    private constructor() {}
+
+    static getInstance(): CandidatoRepository {
+        if (!CandidatoRepository.instance) {
+            CandidatoRepository.instance = new CandidatoRepository()
+        }
+        return CandidatoRepository.instance
+    }
+
     listar(): Candidato[] {
         const data = localStorage.getItem(CHAVE);
         return data ? JSON.parse(data) : [];

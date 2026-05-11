@@ -1,30 +1,15 @@
-import type { Candidato } from './models/Candidato.js'
-import type { Empresa   } from './models/Empresa.js'
-import type { Vaga      } from './models/Vaga.js'
+import { ServiceFactory    } from './factories/ServiceFactory.js'
+import { CandidatoFactory  } from './factories/CandidatoFactory.js'
+import { EmpresaFactory    } from './factories/EmpresaFactory.js'
+import { VagaFactory       } from './factories/VagaFactory.js'
 
-import { CandidatoRepository } from './repositories/CandidatoRepository.js'
-import { EmpresaRepository   } from './repositories/EmpresaRepository.js'
-import { VagaRepository      } from './repositories/VagaRepository.js'
-
-import { CandidatoValidator } from './validators/CandidatoValidator.js'
-import { EmpresaValidator   } from './validators/EmpresaValidators.js'
-import { VagaValidator      } from './validators/VagaValidator.js'
-
-import { CandidatoService } from './services/CandidatoService.js'
-import { EmpresaService   } from './services/EmpresaService.js'
-import { VagaService      } from './services/VagaService.js'
+import type { Empresa } from './models/Empresa.js'
 
 import { mascaraCPF, mascaraCNPJ, mascaraTelefone, mascaraCEP } from './validators/mascaras.js'
 
-const candidatoService = new CandidatoService(
-    new CandidatoRepository(), new CandidatoValidator()
-)
-const empresaService = new EmpresaService(
-    new EmpresaRepository(), new EmpresaValidator()
-)
-const vagaService = new VagaService(
-    new VagaRepository(), new VagaValidator()
-)
+const candidatoService = ServiceFactory.criarCandidatoService()
+const empresaService   = ServiceFactory.criarEmpresaService()
+const vagaService      = ServiceFactory.criarVagaService()
 
 function aplicarMascara(id: string, fn: (v: string) => string): void {
     const input = document.getElementById(id) as HTMLInputElement
@@ -40,35 +25,27 @@ aplicarMascara('cnpj-emp',      mascaraCNPJ)
 aplicarMascara('cep-cand',      mascaraCEP)
 aplicarMascara('cep-emp',       mascaraCEP)
 
-function gerarId(): string {
-    return Math.random().toString(36).substring(2, 9)
-}
-
 function obterValor(id: string): string {
     return (document.getElementById(id) as HTMLInputElement).value
-}
-
-function coletarDadosCandidato(): Candidato {
-    return {
-        id:          gerarId(),
-        nome:        obterValor('nome-cand'),
-        email:       obterValor('email-cand'),
-        cpf:         obterValor('cpf-cand'),
-        telefone:    obterValor('telefone-cand'),
-        linkedin:    obterValor('linkedin-cand'),
-        cep:         obterValor('cep-cand'),
-        idade:       parseInt(obterValor('idade-cand'), 10),
-        estado:      obterValor('estado-cand'),
-        descricao:   obterValor('descricao-cand'),
-        habilidades: obterValor('habilidades-cand').split(',').map(s => s.trim())
-    }
 }
 
 document.getElementById('form-candidato')
     ?.addEventListener('submit', (e) => {
         e.preventDefault()
         try {
-            candidatoService.cadastrar(coletarDadosCandidato())
+            const candidato = CandidatoFactory.criar({
+                nome:        obterValor('nome-cand'),
+                email:       obterValor('email-cand'),
+                cpf:         obterValor('cpf-cand'),
+                telefone:    obterValor('telefone-cand'),
+                linkedin:    obterValor('linkedin-cand'),
+                cep:         obterValor('cep-cand'),
+                idade:       parseInt(obterValor('idade-cand'), 10),
+                estado:      obterValor('estado-cand'),
+                descricao:   obterValor('descricao-cand'),
+                habilidades: obterValor('habilidades-cand').split(',').map(s => s.trim())
+            })
+            candidatoService.cadastrar(candidato)
             alert('Candidato cadastrado com sucesso!')
             ;(e.target as HTMLFormElement).reset()
         } catch (erro: unknown) {
@@ -76,24 +53,20 @@ document.getElementById('form-candidato')
         }
     })
 
-function coletarDadosEmpresa(): Empresa {
-    return {
-        id:        gerarId(),
-        nome:      obterValor('nome-emp'),
-        email:     obterValor('email-emp'),
-        cnpj:      obterValor('cnpj-emp'),
-        pais:      obterValor('pais-emp'),
-        estado:    obterValor('estado-emp'),
-        cep:       obterValor('cep-emp'),
-        descricao: obterValor('descricao-emp'),
-    }
-}
-
 document.getElementById('form-empresa')
     ?.addEventListener('submit', (e) => {
         e.preventDefault()
         try {
-            empresaService.cadastrar(coletarDadosEmpresa())
+            const empresa = EmpresaFactory.criar({
+                nome:      obterValor('nome-emp'),
+                email:     obterValor('email-emp'),
+                cnpj:      obterValor('cnpj-emp'),
+                pais:      obterValor('pais-emp'),
+                estado:    obterValor('estado-emp'),
+                cep:       obterValor('cep-emp'),
+                descricao: obterValor('descricao-emp'),
+            })
+            empresaService.cadastrar(empresa)
             alert('Empresa cadastrada com sucesso!')
             ;(e.target as HTMLFormElement).reset()
         } catch (erro: unknown) {
@@ -147,17 +120,6 @@ document.addEventListener('click', (e) => {
     }
 })
 
-function coletarDadosVaga(): Vaga {
-    return {
-        id:           gerarId(),
-        empresaId:    empresaIdOculto.value,
-        titulo:       obterValor('titulo-vaga'),
-        descricao:    obterValor('descricao-vaga'),
-        local:        obterValor('local-vaga'),
-        competencias: obterValor('competencias-vaga').split(',').map(s => s.trim())
-    }
-}
-
 document.getElementById('form-vaga')
     ?.addEventListener('submit', (e) => {
         e.preventDefault()
@@ -166,7 +128,14 @@ document.getElementById('form-vaga')
             return
         }
         try {
-            vagaService.cadastrar(coletarDadosVaga())
+            const vaga = VagaFactory.criar({
+                empresaId:    empresaIdOculto.value,
+                titulo:       obterValor('titulo-vaga'),
+                descricao:    obterValor('descricao-vaga'),
+                local:        obterValor('local-vaga'),
+                competencias: obterValor('competencias-vaga').split(',').map(s => s.trim())
+            })
+            vagaService.cadastrar(vaga)
             alert('Vaga publicada com sucesso!')
             ;(e.target as HTMLFormElement).reset()
             buscaEmpresaInput.value = ''
@@ -174,4 +143,3 @@ document.getElementById('form-vaga')
             alert(erro instanceof Error ? erro.message : 'Erro desconhecido.')
         }
     })
-

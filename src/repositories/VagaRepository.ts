@@ -2,6 +2,17 @@ import type { Vaga } from "../models/Vaga.js";
 import type { IVagaRepository } from "./IVagaRepository.js";
 
 export class VagaRepository implements IVagaRepository{
+    private static instance: VagaRepository
+
+    private constructor() {}
+
+    static getInstance(): VagaRepository {
+        if (!VagaRepository.instance) {
+            VagaRepository.instance = new VagaRepository()
+        }
+        return VagaRepository.instance
+    }
+
     CHAVE = "linketinder_vagas"
     listar(): Vaga[] {
         const data = localStorage.getItem(this.CHAVE)

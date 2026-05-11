@@ -3,8 +3,8 @@ import { Vaga } from './models/Vaga.js';
 import { EmpresaRepository } from './repositories/EmpresaRepository.js';
 import { VagaRepository } from './repositories/VagaRepository.js';
 
-const vagaRepo = new VagaRepository();
-const empresaRepo = new EmpresaRepository();
+const vagaRepo    = VagaRepository.getInstance();
+const empresaRepo = EmpresaRepository.getInstance();
 
 
 const tabelaBody = document.querySelector('#tabela-vagas tbody') as HTMLTableSectionElement;
