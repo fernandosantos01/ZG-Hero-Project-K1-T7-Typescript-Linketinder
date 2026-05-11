@@ -145,6 +145,75 @@ Separa o "o quê" (regra de negócio no service) do "como" (persistência no rep
 
 ---
 
+## 🏗️ Refatoração para MVC Completo
+
+### O problema antes da refatoração
+
+Os arquivos de tela (`formularioCadastro.ts`, `perfil-candidato.ts`, `perfil-empresa.ts`) acumulavam duas responsabilidades distintas no mesmo lugar:
+
+- **Lógica de controle**: capturar eventos de formulário, chamar services, tomar decisões
+- **Lógica de renderização**: construir `<tr>`, `<li>`, manipular `innerHTML`, posicionar tooltips
+
+Isso violava o princípio MVC porque não havia separação entre quem decide (Controller) e quem exibe (View). Qualquer mudança visual exigia mexer no mesmo arquivo que continha regras de fluxo, e vice-versa.
+
+---
+
+### O que foi corrigido
+
+#### 1. Extração das Views
+
+Criada a camada `src/views/` com três classes, cada uma responsável exclusivamente por manipular o DOM de uma tela:
+
+| Arquivo | Responsabilidade |
+|---|---|
+| `FormularioCadastroView.ts` | Lê valores dos inputs, renderiza lista de sugestões de empresa, expõe métodos de seleção e limpeza |
+| `VagaListView.ts` | Monta as linhas da tabela de vagas e configura os tooltips flutuantes |
+| `CandidatoListView.ts` | Monta a tabela de candidatos, configura tooltips e renderiza o gráfico Chart.js |
+
+As Views não chamam nenhum service e não criam objetos de domínio. Recebem dados prontos e apenas exibem.
+
+#### 2. Extração dos Controllers
+
+Criada a camada `src/controllers/` com três classes, cada uma responsável por orquestrar o fluxo de uma tela:
+
+| Arquivo | Responsabilidade |
+|---|---|
+| `CadastroController.ts` | Registra os listeners dos formulários de candidato, empresa e vaga; usa factories para criar os objetos e chama os services |
+| `PerfilCandidatoController.ts` | Busca vagas e empresas nos services e entrega os dados à `VagaListView` para renderização |
+| `PerfilEmpresaController.ts` | Busca candidatos no service e entrega à `CandidatoListView` para renderização e geração do gráfico |
+
+Os Controllers não tocam diretamente no DOM — toda manipulação visual é delegada à View.
+
+#### 3. Entry points reduzidos a composição pura
+
+Os arquivos de entrada (`formularioCadastro.ts`, `perfil-candidato.ts`, `perfil-empresa.ts`) passaram de ~180 linhas de lógica mista para 9 linhas cada: instanciam controller com suas dependências via `ServiceFactory` e chamam `init()`.
+
+```ts
+// formularioCadastro.ts — antes: ~180 linhas com lógica, DOM e criação de objetos
+// formularioCadastro.ts — depois:
+const controller = new CadastroController(
+    ServiceFactory.criarCandidatoService(),
+    ServiceFactory.criarEmpresaService(),
+    ServiceFactory.criarVagaService(),
+    new FormularioCadastroView()
+)
+controller.init()
+```
+
+---
+
+### Como a refatoração tornou o código melhor
+
+**Responsabilidade única por arquivo**: cada classe tem uma razão para mudar. Alterar o visual de um tooltip → mexe só na View. Alterar a regra de qual empresa mostrar no autocomplete → mexe só no Controller.
+
+**Testabilidade**: é possível testar o Controller injetando uma View falsa (mock) sem abrir nenhum navegador. Antes, testar o fluxo de cadastro exigia simular toda a estrutura do DOM junto.
+
+**Legibilidade**: um desenvolvedor lendo `CadastroController` entende o fluxo completo da tela sem precisar rastrear código de DOM misturado. Um desenvolvedor lendo `FormularioCadastroView` entende exatamente quais elementos de tela existem, sem ver lógica de negócio.
+
+**Evolução independente**: se o design mudar completamente (ex.: substituir a tabela por cards), apenas a View é reescrita. O Controller e os services continuam intactos.
+
+---
+
 ## 🧱 Estrutura do Projeto
 
 ```text
@@ -156,30 +225,38 @@ Separa o "o quê" (regra de negócio no service) do "como" (persistência no rep
 ├── css/
 │   └── style.css
 ├── src/
-│   ├── formularioCadastro.ts
-│   ├── perfil-candidato.ts
-│   ├── perfil-empresa.ts
-│   ├── factories/
+│   ├── formularioCadastro.ts   ← entry point (composição + init)
+│   ├── perfil-candidato.ts     ← entry point (composição + init)
+│   ├── perfil-empresa.ts       ← entry point (composição + init)
+│   ├── controllers/            ← C: orquestra eventos → service → view
+│   │   ├── CadastroController.ts
+│   │   ├── PerfilCandidatoController.ts
+│   │   └── PerfilEmpresaController.ts
+│   ├── views/                  ← V: manipula DOM, nunca chama service
+│   │   ├── FormularioCadastroView.ts
+│   │   ├── VagaListView.ts
+│   │   └── CandidatoListView.ts
+│   ├── factories/              ← criação de objetos e composição de dependências
 │   │   ├── CandidatoFactory.ts
 │   │   ├── EmpresaFactory.ts
 │   │   ├── VagaFactory.ts
 │   │   └── ServiceFactory.ts
-│   ├── models/
+│   ├── models/                 ← M: interfaces de domínio
 │   │   ├── Candidato.ts
 │   │   ├── Empresa.ts
 │   │   └── Vaga.ts
-│   ├── repositories/
+│   ├── repositories/           ← M: acesso a dados (Singleton + interfaces)
 │   │   ├── CandidatoRepository.ts
 │   │   ├── EmpresaRepository.ts
 │   │   ├── VagaRepository.ts
 │   │   ├── ICandidatoRepository.ts
 │   │   ├── IEmpresaRepository.ts
 │   │   └── IVagaRepository.ts
-│   ├── services/
+│   ├── services/               ← M: regras de negócio (DI via construtor)
 │   │   ├── CandidatoService.ts
 │   │   ├── EmpresaService.ts
 │   │   └── VagaService.ts
-│   └── validators/
+│   └── validators/             ← M: validações e máscaras
 │       ├── CandidatoValidator.ts
 │       ├── EmpresaValidators.ts
 │       ├── VagaValidator.ts
